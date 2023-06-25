@@ -1,0 +1,50 @@
+#!/bin/bash
+# shellcheck disable=SC2155
+
+function main() {
+    DIR_PROJECT_ROOT="$(get_project_root_dir)"
+    DIR_COMMAND="${DIR_PROJECT_ROOT}/src/command"
+
+    local COMMAND=${1}
+
+    if [ -z "${COMMAND}" ]; then
+        print_about
+        exit 0
+    else
+        local SCRIPT="${DIR_COMMAND}/${COMMAND}.sh"
+
+        if [ ! -f "${SCRIPT}" ]; then
+            echo "Command \"${COMMAND}\" not exist."
+            exit 1
+        fi
+
+        bash "${SCRIPT}" "${@:2}"
+    fi
+}
+
+function get_project_root_dir() {
+    local SCRIPT=$(readlink -f "${0}")
+    local DIR=$(dirname "${SCRIPT}")
+    echo "${DIR}/.." || exit 1
+}
+
+function print_about() {
+    cat << HEREDOC
+   __              ____
+  / /_____  ____  / / /_  ____  _  __
+ / __/ __ \/ __ \/ / __ \/ __ \| |/_/
+/ /_/ /_/ / /_/ / / /_/ / /_/ />  <
+\__/\____/\____/_/_.___/\____/_/|_|
+HEREDOC
+
+    echo ""
+    echo "Available commands:"
+
+    local SCRIPTS=$(ls "${DIR_COMMAND}"/*.sh)
+    for SCRIPT in ${SCRIPTS}; do
+        local COMMAND=$(echo "${SCRIPT}" | sed -E "s/^.+\///g" | sed -E "s/\.sh$//g")
+        echo "  ${COMMAND}"
+    done
+}
+
+main "$@"

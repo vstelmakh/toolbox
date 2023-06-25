@@ -6,7 +6,7 @@ _toolbox_completions() {
             return 0
             ;;
         2)
-            local COMMANDS=$(toolbox --commands)
+            local COMMANDS=$(toolbox --toolbox-completion)
             COMPREPLY=($(compgen -W "${COMMANDS}" "${COMP_WORDS[1]}"))
             ;;
         *)

@@ -5,29 +5,67 @@ function main() {
     DIR_PROJECT_ROOT="$(get_project_root_dir)"
     DIR_COMMAND="${DIR_PROJECT_ROOT}/src/command"
 
+    case "${1}" in
+        "")
+            command_about
+            exit 0
+            ;;
+        "--toolbox-completion")
+            command_completion
+            ;;
+        *)
+            command_execute "$@"
+            ;;
+    esac
+}
+
+function command_execute() {
     local COMMAND=${1}
-
-    if [ -z "${COMMAND}" ]; then
-        print_about
-        exit 0
-    elif [ "${COMMAND}" == '--commands' ]; then
-        echo "$(get_commands)"
-    else
-        local SCRIPT="${DIR_COMMAND}/${COMMAND}.sh"
-
-        if [ ! -f "${SCRIPT}" ]; then
-            echo "Command \"${COMMAND}\" not exist."
-            exit 1
-        fi
-
-        bash "${SCRIPT}" "${@:2}"
+    local FILE="$(get_command_file "${COMMAND}")"
+    if [ ! -f "${FILE}" ]; then
+        echo -e "Command \"\e[32m${COMMAND}\e[0m\" not exist"
+        exit 1
     fi
+
+    bash "${FILE}" "${@:2}"
+}
+
+function command_completion() {
+    echo "$(get_commands)"
+}
+
+function command_about() {
+    cat << HEREDOC
+   __              ____
+  / /_____  ____  / / /_  ____  _  __
+ / __/ __ \/ __ \/ / __ \/ __ \| |/_/
+/ /_/ /_/ / /_/ / / /_/ / /_/ />  <
+\__/\____/\____/_/_.___/\____/_/|_|
+HEREDOC
+
+    echo
+    echo -e "\e[33mAvailable commands:\e[0m"
+
+    local COMMANDS=()
+    IFS=" " read -r -a COMMANDS <<< "$(get_commands)"
+    local COMMAND_MAX_LENGTH="$(get_max_length "${COMMANDS[@]}")"
+
+    for COMMAND in "${COMMANDS[@]}"; do
+        printf "  \e[32m%-${COMMAND_MAX_LENGTH}s\e[0m  " "${COMMAND}"
+        local FILE="$(get_command_file "${COMMAND}")"
+        echo "$(source "${FILE}" "--toolbox-description")"
+    done
 }
 
 function get_project_root_dir() {
     local SCRIPT=$(readlink -f "${0}")
     local DIR=$(dirname "${SCRIPT}")
     echo "${DIR}/.." || exit 1
+}
+
+function get_command_file() {
+    local COMMAND=${1}
+    echo "${DIR_COMMAND}/${COMMAND}.sh"
 }
 
 function get_commands() {
@@ -40,22 +78,16 @@ function get_commands() {
     echo "${COMMANDS[@]}"
 }
 
-function print_about() {
-    cat << HEREDOC
-   __              ____
-  / /_____  ____  / / /_  ____  _  __
- / __/ __ \/ __ \/ / __ \/ __ \| |/_/
-/ /_/ /_/ / /_/ / / /_/ / /_/ />  <
-\__/\____/\____/_/_.___/\____/_/|_|
-HEREDOC
+function get_max_length() {
+    local ITEMS=()
+    IFS=" " read -r -a ITEMS <<< "${@}"
 
-    echo
-    echo -e "\e[33mAvailable commands:\e[0m"
-
-    local COMMANDS=($(get_commands))
-    for COMMAND in "${COMMANDS[@]}"; do
-        echo "  ${COMMAND}"
+    local MAX=0
+    for ITEM in "${ITEMS[@]}"; do
+        local LENGTH=${#ITEM}
+        ((LENGTH > ITEM)) && MAX=${LENGTH}
     done
+    echo "${MAX}"
 }
 
 main "$@"

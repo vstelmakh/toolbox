@@ -6,11 +6,14 @@ _toolbox_completions() {
             return 0
             ;;
         2)
-            local COMMANDS=$(toolbox --toolbox-completion)
-            COMPREPLY=($(compgen -W "${COMMANDS}" "${COMP_WORDS[1]}"))
+            local COMPLETION=$(toolbox --toolbox-completion)
+            COMPREPLY=($(compgen -W "${COMPLETION}" "${COMP_WORDS[1]}"))
+            return 0
             ;;
         *)
-            # TODO: take suggestions from corresponding command
+            local COMPLETION=$(toolbox "${COMP_WORDS[1]}" --toolbox-completion "${COMP_WORDS[@]:2}")
+            COMPREPLY=($(compgen -W "${COMPLETION}" \""${COMP_WORDS[-1]}"\"))
+            return 0
             ;;
     esac
 }

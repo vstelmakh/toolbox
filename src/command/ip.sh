@@ -6,7 +6,7 @@ function main() {
             command_description
             ;;
         "--toolbox-completion")
-            command_completion
+            command_completion "${@:2}"
             ;;
         *)
             command_execute "$@"
@@ -20,13 +20,28 @@ function command_description() {
 }
 
 function command_completion() {
-    echo ""
-    exit 0
+    case "${#@}" in
+        1)
+            echo "4 6 64"
+            ;;
+    esac
 }
 
 function command_execute() {
-    curl "https://api.ipify.org"
-    echo
+    case "${1}" in
+        ""|"4")
+            curl "https://api.ipify.org" && echo
+            exit 0
+            ;;
+        "6"|"64")
+            curl "https://api64.ipify.org" && echo
+            exit 0
+            ;;
+        *)
+            echo "Unexpected IP version argument"
+            exit 1
+            ;;
+    esac
 }
 
 main "$@"

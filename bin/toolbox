@@ -10,6 +10,8 @@ function main() {
     if [ -z "${COMMAND}" ]; then
         print_about
         exit 0
+    elif [ "${COMMAND}" == '--commands' ]; then
+        echo "$(get_commands)"
     else
         local SCRIPT="${DIR_COMMAND}/${COMMAND}.sh"
 
@@ -28,6 +30,16 @@ function get_project_root_dir() {
     echo "${DIR}/.." || exit 1
 }
 
+function get_commands() {
+    local COMMANDS=()
+    local SCRIPTS=$(ls "${DIR_COMMAND}"/*.sh)
+    for SCRIPT in ${SCRIPTS}; do
+        local COMMAND=$(echo "${SCRIPT}" | sed -E "s/^.+\///g" | sed -E "s/\.sh$//g")
+        COMMANDS+=("${COMMAND}")
+    done
+    echo "${COMMANDS[@]}"
+}
+
 function print_about() {
     cat << HEREDOC
    __              ____
@@ -37,12 +49,11 @@ function print_about() {
 \__/\____/\____/_/_.___/\____/_/|_|
 HEREDOC
 
-    echo ""
-    echo "Available commands:"
+    echo
+    echo -e "\e[33mAvailable commands:\e[0m"
 
-    local SCRIPTS=$(ls "${DIR_COMMAND}"/*.sh)
-    for SCRIPT in ${SCRIPTS}; do
-        local COMMAND=$(echo "${SCRIPT}" | sed -E "s/^.+\///g" | sed -E "s/\.sh$//g")
+    local COMMANDS=($(get_commands))
+    for COMMAND in "${COMMANDS[@]}"; do
         echo "  ${COMMAND}"
     done
 }

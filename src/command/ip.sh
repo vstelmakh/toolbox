@@ -15,7 +15,7 @@ function main() {
 }
 
 function command_description() {
-    echo "Detect and print current public IP"
+    echo "Detects and prints current public IP"
     exit 0
 }
 

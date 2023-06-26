@@ -85,7 +85,7 @@ function get_max_length() {
     local MAX=0
     for ITEM in "${ITEMS[@]}"; do
         local LENGTH=${#ITEM}
-        ((LENGTH > ITEM)) && MAX=${LENGTH}
+        ((LENGTH > MAX)) && MAX=${LENGTH}
     done
     echo "${MAX}"
 }

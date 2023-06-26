@@ -19,30 +19,15 @@ function main() {
 }
 
 function command_description() {
-    echo "Detect and print current public IP"
+    echo "Run AWS CLI command in Docker container"
 }
 
 function command_completion() {
-    case "${#@}" in
-        1)
-            echo "4 64"
-            ;;
-    esac
+    echo ""
 }
 
 function command_execute() {
-    case "${1}" in
-        ""|"4")
-            curl "https://api.ipify.org" && echo
-            ;;
-        "64")
-            curl "https://api64.ipify.org" && echo
-            ;;
-        *)
-            echo "Unexpected IP version argument"
-            exit 1
-            ;;
-    esac
+    docker run --rm -ti -v "${HOME}/.aws:/root/.aws" -v "$(pwd):/aws" amazon/aws-cli "$@"
 }
 
 function command_help() {
@@ -51,14 +36,18 @@ function command_help() {
   $(command_description)
 
 \e[33mUsage:\e[0m
-  ip [options] [<version>]
-  ip 64
+  aws [options] [<commands>...]
+  aws ec2 describe-instances
 
 \e[33mArguments:\e[0m
-  \e[32mversion\e[0m  IP version to detect. Available values: "4", "64". \e[33m[default: 4]\e[0m
+  \e[32mcommands\e[0m  AWS CLI commands
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help
+
+\e[33mHelp:\e[0m
+  Keep in mind only \e[33mcurrent work dir\e[0m is synchronized with container.
+  Which means only \e[33m.\e[0m is allowed as a path to store something e.g. while downloading from s3.
 HEREDOC
 )
     echo -e "${TEXT}"

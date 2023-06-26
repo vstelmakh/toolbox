@@ -21,7 +21,7 @@ function main() {
 }
 
 function command_description() {
-    echo "Generates random password"
+    echo "Generate random password"
 }
 
 function command_completion() {

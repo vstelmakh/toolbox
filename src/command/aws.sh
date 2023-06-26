@@ -40,7 +40,7 @@ function command_help() {
   aws ec2 describe-instances
 
 \e[33mArguments:\e[0m
-  \e[32mcommands\e[0m  AWS CLI commands
+  \e[32mcommands\e[0m    AWS CLI commands
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help

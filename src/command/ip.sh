@@ -55,7 +55,7 @@ function command_help() {
   ip 64
 
 \e[33mArguments:\e[0m
-  \e[32mversion\e[0m  IP version to detect. Available values: "4", "64". \e[33m[default: 4]\e[0m
+  \e[32mversion\e[0m     IP version to detect. Available values: "4", "64". \e[33m[default: 4]\e[0m
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help

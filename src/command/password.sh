@@ -76,7 +76,7 @@ function command_help() {
   password -c 10
 
 \e[33mArguments:\e[0m
-  \e[32mlength\e[0m  Generated password length \e[33m[default: ${DEFAULT_LENGTH}]\e[0m
+  \e[32mlength\e[0m      Generated password length \e[33m[default: ${DEFAULT_LENGTH}]\e[0m
 
 \e[33mOptions:\e[0m
   \e[32m-c\e[0m          Generate more complex password with punctuation characters

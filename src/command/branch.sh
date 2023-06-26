@@ -25,12 +25,28 @@ function command_description() {
 }
 
 function command_completion() {
-    echo ""
+    case "${#@}" in
+        1)
+            echo "-c"
+            ;;
+    esac
 }
 
 function command_execute() {
+    local HAS_TO_CHEKOUT=false
+    if [ "${1}" == "-c" ]; then
+        shift
+        HAS_TO_CHEKOUT=true
+
+        local IS_GIT_REPO="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
+        if [ "${IS_GIT_REPO}" != true ]; then
+            echo "Unable to checkout branch. Current workdir is not a Git repository."
+            exit 1
+        fi
+    fi
+
     if [ -z "${*}" ]; then
-        echo "Ticket title not provided. Impossible to generate branch for empty title."
+        echo "Ticket title not provided. Impossible to generate branch name for empty title."
         exit 1
     fi
 
@@ -46,9 +62,15 @@ function command_execute() {
     BRANCH_NAME=$(get_trim_spacer "${BRANCH_NAME}")
 
     if [[ -n "${TICKET_NUMBER}" ]]; then
-        echo "${TICKET_NUMBER}-${BRANCH_NAME}"
+        local BRANCH="${TICKET_NUMBER}${SPACER}${BRANCH_NAME}"
     else
-        echo "${BRANCH_NAME}"
+        local BRANCH="${BRANCH_NAME}"
+    fi
+
+    echo "${BRANCH}"
+
+    if [ "${HAS_TO_CHEKOUT}" == true ]; then
+        git checkout -b "${BRANCH}"
     fi
 }
 
@@ -111,9 +133,10 @@ function command_help() {
   branch WS-13 Define new project structure
 
 \e[33mArguments:\e[0m
-  \e[32mtitle\e[0m  Ticket title. Expected to look like: "WS-13 Define new project structure"
+  \e[32mtitle\e[0m       Ticket title. Expected to look like: "WS-13 Define new project structure"
 
 \e[33mOptions:\e[0m
+  \e[32m-c\e[0m          Checkout to generated branch in current workdir
   \e[32m-h, --help\e[0m  Display this help
 HEREDOC
 )

@@ -1,9 +1,9 @@
 #!/bin/bash
 # shellcheck disable=SC2155
 
-function main() {
-    DEFAULT_LENGTH=12
+readonly DEFAULT_LENGTH=12
 
+function main() {
     case "${1}" in
         "--toolbox-description")
             command_description

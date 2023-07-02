@@ -1,9 +1,10 @@
 #!/bin/bash
-# shellcheck disable=SC2155
+# shellcheck disable=SC2155,SC1090
 
 function main() {
     DIR_PROJECT_ROOT="$(get_project_root_dir)"
     DIR_COMMAND="${DIR_PROJECT_ROOT}/src/command"
+    load_config
 
     case "${1}" in
         "")
@@ -43,6 +44,14 @@ function command_about() {
 \__/\____/\____/_/_.___/\____/_/|_|
 HEREDOC
 
+    command_execute config validate >> /dev/null
+    if [ $? -gt 0 ]; then
+        echo
+        echo -e "\e[93mWarning:\e[0m"
+        echo -e "  Config \e[33mconfig.env\e[0m does not contain all the required parameters, some commands may not work."
+        echo -e "  Execute \e[32mconfig\e[0m command for the details."
+    fi
+
     echo
     echo -e "\e[33mAvailable commands:\e[0m"
 
@@ -61,6 +70,15 @@ function get_project_root_dir() {
     local SCRIPT=$(readlink -f "${0}")
     local DIR=$(dirname "${SCRIPT}")
     echo "${DIR}/.." || exit 1
+}
+
+function load_config() {
+    local CONFIG_FILE="${DIR_PROJECT_ROOT}/config.env"
+    if [ -f "${CONFIG_FILE}" ]; then
+        set -o allexport
+        source "${CONFIG_FILE}"
+        set +o allexport
+    fi
 }
 
 function get_command_file() {

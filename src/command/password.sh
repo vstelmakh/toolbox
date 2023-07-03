@@ -27,7 +27,7 @@ function command_description() {
 function command_completion() {
     case "${#@}" in
         1)
-            echo "-c"
+            echo "--complex"
             ;;
     esac
 }
@@ -39,7 +39,7 @@ function command_execute() {
     local ARGUMENTS=("${0}")
     while [[ "$#" -gt 0 ]]; do
         case "${1}" in
-            "-c")
+            "-c"|"--complex")
                 IS_COMPLEX=true
                 shift
                 ;;
@@ -62,8 +62,8 @@ function command_execute() {
 function generate_password() {
     local LENGTH="${1}"
     local CHARSET=$([ "${2}" != true ] && echo "A-Za-z0-9" || echo "A-Za-z0-9!@#$%&*=+.?")
-    local AMBIGUOUS_CAHRS="IOl"
-    head /dev/urandom | tr -dc "${CHARSET}" | tr -d "${AMBIGUOUS_CAHRS}" | head -c"${LENGTH}"
+    local AMBIGUOUS_CHARS="IOl"
+    head /dev/urandom | tr -dc "${CHARSET}" | tr -d "${AMBIGUOUS_CHARS}" | head -c"${LENGTH}"
 }
 
 function command_help() {
@@ -76,11 +76,11 @@ function command_help() {
   password -c 10
 
 \e[33mArguments:\e[0m
-  \e[32mlength\e[0m      Generated password length \e[33m[default: ${DEFAULT_LENGTH}]\e[0m
+  \e[32mlength\e[0m        Generated password length \e[33m[default: ${DEFAULT_LENGTH}]\e[0m
 
 \e[33mOptions:\e[0m
-  \e[32m-c\e[0m          Generate more complex password with punctuation characters
-  \e[32m-h, --help\e[0m  Display this help
+  \e[32m-c, --complex\e[0m Generate more complex password with punctuation characters
+  \e[32m-h, --help\e[0m    Display this help
 HEREDOC
 )
     echo -e "${TEXT}"

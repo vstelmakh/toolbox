@@ -27,16 +27,16 @@ function command_description() {
 function command_completion() {
     case "${#@}" in
         1)
-            echo "-c"
+            echo "--checkout"
             ;;
     esac
 }
 
 function command_execute() {
-    local HAS_TO_CHEKOUT=false
-    if [ "${1}" == "-c" ]; then
+    local HAS_TO_CHECKOUT=false
+    if [ "${1}" == "-c" ] || [ "${1}" == "--checkout" ]; then
         shift
-        HAS_TO_CHEKOUT=true
+        HAS_TO_CHECKOUT=true
 
         local IS_GIT_REPO="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
         if [ "${IS_GIT_REPO}" != true ]; then
@@ -69,7 +69,7 @@ function command_execute() {
 
     echo "${BRANCH}"
 
-    if [ "${HAS_TO_CHEKOUT}" == true ]; then
+    if [ "${HAS_TO_CHECKOUT}" == true ]; then
         git checkout -b "${BRANCH}"
     fi
 }
@@ -133,11 +133,11 @@ function command_help() {
   branch WS-13 Define new project structure
 
 \e[33mArguments:\e[0m
-  \e[32mtitle\e[0m       Ticket title. Expected to look like: "WS-13 Define new project structure"
+  \e[32mtitle\e[0m          Ticket title. Expected to look like: "WS-13 Define new project structure"
 
 \e[33mOptions:\e[0m
-  \e[32m-c\e[0m          Checkout to generated branch in current workdir
-  \e[32m-h, --help\e[0m  Display this help
+  \e[32m-c, --checkout\e[0m Checkout to generated branch in current workdir
+  \e[32m-h, --help\e[0m     Display this help
 HEREDOC
 )
     echo -e "${TEXT}"

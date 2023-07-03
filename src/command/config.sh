@@ -37,6 +37,8 @@ function command_execute() {
     esac
 }
 
+# It's important to execute this command without env variables
+# to not pollute validation environment with existing config variables
 function command_execute_without_env() {
     local _CONFIG_FILE="$(get_config_file_path)"
     declare -A PARAMETERS_MISSING=()

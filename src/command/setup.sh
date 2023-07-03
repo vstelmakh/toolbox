@@ -19,7 +19,7 @@ function main() {
 }
 
 function command_description() {
-    echo "Setup toolbox executable and command autocompletion"
+    echo "Setup toolbox executable and command autocompletion for current user"
 }
 
 function command_completion() {

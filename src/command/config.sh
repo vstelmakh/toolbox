@@ -45,14 +45,20 @@ function command_execute_without_env() {
     declare -A PARAMETERS_UNEXPECTED=()
     declare -A PARAMETERS_DEFINED=()
 
+    echo -en "\e[33mConfig:\e[0m "
+    if [ -f "${_CONFIG_FILE}" ]; then
+        readlink -f "${_CONFIG_FILE}"
+    else
+        echo "Not exist"
+    fi
+
     local PREFIX="CONFIG_"
     if [ -n "${1}" ]; then
         PREFIX=$(echo "${PREFIX}${1^^}_" | sed -E "s/[^a-z0-9]/_/gi")
     fi
     local VAR_SUBSTITUTION="\${!${PREFIX}@}"
-    echo -e "\e[33mPrefix:\e[0m"
+    echo -en "\e[33mPrefix:\e[0m "
     echo "${PREFIX}"
-    echo
 
     set -o allexport
     source "${_CONFIG_FILE}.dist"
@@ -81,7 +87,7 @@ function command_execute_without_env() {
         unset "${PARAMETER}"
     done
 
-    echo -e "\e[33mLegend:\e[0m"
+    echo -en "\e[33mLegend:\e[0m "
     echo -e "\e[1m\e[31mM\e[0missing, \e[1m\e[93mU\e[0mnexpected, \e[1m\e[32mS\e[0met"
     echo
 

@@ -2,6 +2,38 @@
 # shellcheck disable=SC2155
 
 function main() {
+    case "${1}" in
+        "--toolbox-description")
+            command_description
+            ;;
+        "--toolbox-completion")
+            command_completion "${@:2}"
+            ;;
+        "-h"|"--help")
+            command_help "${@:2}"
+            ;;
+        *)
+            command_execute "$@"
+            ;;
+    esac
+}
+
+function command_description() {
+    echo "Setup toolbox executable and command autocompletion"
+}
+
+function command_completion() {
+    case "${#@}" in
+        1)
+            echo "install uninstall"
+            ;;
+        2)
+            echo "--force"
+            ;;
+    esac
+}
+
+function command_execute() {
     DIR_PROJECT_ROOT="$(get_project_root_dir)"
     BIN_NAME="toolbox"
 
@@ -14,19 +46,19 @@ function main() {
     COMPLETION_LINK="${COMPLETION_DIR}/${BIN_NAME}"
 
     IS_FORCE=false
-    if [ "${1}" == '-f' ] || [ "${2}" == "-f" ]; then
+    if [ "${2}" == "-f" ] || [ "${2}" == "--force" ]; then
         IS_FORCE=true
     fi
 
     case "${1}" in
-        "install"|"-f"|"")
+        ""|"install")
             do_install
             ;;
         "uninstall")
             do_uninstall
             ;;
         *)
-            print_error "Command \"${1}\" not exist"
+            echo -e "Unexpected action \e[33m${1}\e[0m. See \e[32m--help\e[0m for available arguments"
             exit 1
             ;;
     esac
@@ -102,7 +134,7 @@ function get_existing_bin_print() {
 function get_project_root_dir() {
     local SCRIPT=$(readlink -f "${0}")
     local DIR=$(dirname "${SCRIPT}")
-    echo "${DIR}" || exit 1
+    readlink -f "${DIR}/../.." || exit 1
 }
 
 function print_file_path() {
@@ -139,6 +171,26 @@ function print_success() {
 function print_info() {
     local MESSAGE=$1
     echo -e "\e[1m\e[34mI\e[0m ${MESSAGE}"
+}
+
+function command_help() {
+    local TEXT=$(cat << HEREDOC
+\e[33mDescription:\e[0m
+  $(command_description)
+
+\e[33mUsage:\e[0m
+  ip [options] [<action>]
+  setup install -f
+
+\e[33mArguments:\e[0m
+  \e[32maction\e[0m      Action to perform. Available values: "install", "uninstall". \e[33m[default: install]\e[0m
+
+\e[33mOptions:\e[0m
+  \e[32m-f, --force\e[0m Perform action despite warning
+  \e[32m-h, --help\e[0m  Display this help
+HEREDOC
+)
+    echo -e "${TEXT}"
 }
 
 main "$@"

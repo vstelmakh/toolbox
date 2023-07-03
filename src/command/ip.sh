@@ -39,7 +39,7 @@ function command_execute() {
             curl "https://api64.ipify.org" && echo
             ;;
         *)
-            echo "Unexpected IP version argument"
+            echo -e "Unexpected IP version \e[33m${1}\e[0m. See \e[32m--help\e[0m for available arguments"
             exit 1
             ;;
     esac

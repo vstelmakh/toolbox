@@ -28,11 +28,11 @@ function command_completion() {
 
 function command_execute() {
     case "${1}" in
-        "validate")
-            command_execute_without_env
+        "--execute-without-env")
+            command_execute_without_env "${@:2}"
             ;;
         *)
-            env -i bash "${0}" validate
+            env -i bash "${0}" "--execute-without-env" "${@}"
             ;;
     esac
 }
@@ -43,11 +43,21 @@ function command_execute_without_env() {
     declare -A PARAMETERS_UNEXPECTED=()
     declare -A PARAMETERS_DEFINED=()
 
+    local PREFIX="CONFIG_"
+    if [ -n "${1}" ]; then
+        PREFIX=$(echo "${PREFIX}${1^^}_" | sed -E "s/[^a-z0-9]/_/gi")
+    fi
+    local VAR_SUBSTITUTION="\${!${PREFIX}@}"
+    echo -e "\e[33mPrefix:\e[0m"
+    echo "${PREFIX}"
+    echo
+
     set -o allexport
     source "${_CONFIG_FILE}.dist"
     set +o allexport
 
-    for PARAMETER in "${!CONFIG_@}"; do
+    PARAMETERS="$(eval echo "${VAR_SUBSTITUTION}")"
+    for PARAMETER in ${PARAMETERS}; do
         PARAMETERS_MISSING+=([${PARAMETER}]="")
         unset "${PARAMETER}"
     done
@@ -58,7 +68,8 @@ function command_execute_without_env() {
         set +o allexport
     fi
 
-    for PARAMETER in "${!CONFIG_@}"; do
+    PARAMETERS="$(eval echo "${VAR_SUBSTITUTION}")"
+    for PARAMETER in ${PARAMETERS}; do
         if [ -z ${PARAMETERS_MISSING["${PARAMETER}"]+x} ]; then
             PARAMETERS_UNEXPECTED+=([${PARAMETER}]=${!PARAMETER})
         else
@@ -114,7 +125,11 @@ function command_help() {
   $(command_description)
 
 \e[33mUsage:\e[0m
-  config [options] [<commands>...]
+  config [options] [<prefix>]
+  config audio
+
+\e[33mArguments:\e[0m
+  \e[32mprefix\e[0m      Prefix (command) to check for specifically prefixed parameters (limit the scope to one command).
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help

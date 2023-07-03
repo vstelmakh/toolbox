@@ -9,7 +9,6 @@ function main() {
     case "${1}" in
         "")
             command_about
-            exit 0
             ;;
         "--toolbox-completion")
             command_completion
@@ -21,14 +20,16 @@ function main() {
 }
 
 function command_execute() {
-    local COMMAND=${1}
-    local FILE="$(get_command_file "${COMMAND}")"
-    if [ ! -f "${FILE}" ]; then
-        echo -e "Command \"\e[32m${COMMAND}\e[0m\" not exist"
-        exit 1
+    if [ "${2}" != "--toolbox-completion" ]; then # config validation (except completion)
+        local COMMAND=${1}
+        run_command config "${COMMAND}" >> /dev/null
+        if [ $? -gt 0 ]; then
+            echo -e "Missing required configuration. Execute \e[32mconfig\e[0m command for details."
+            exit 1
+        fi
     fi
 
-    bash "${FILE}" "${@:2}"
+    run_command "$@"
 }
 
 function command_completion() {
@@ -44,7 +45,7 @@ function command_about() {
 \__/\____/\____/_/_.___/\____/_/|_|
 HEREDOC
 
-    command_execute config validate >> /dev/null
+    run_command config >> /dev/null
     if [ $? -gt 0 ]; then
         echo
         echo -e "\e[93mWarning:\e[0m"
@@ -79,6 +80,17 @@ function load_config() {
         source "${CONFIG_FILE}"
         set +o allexport
     fi
+}
+
+function run_command() {
+    local COMMAND=${1}
+    local FILE="$(get_command_file "${COMMAND}")"
+    if [ ! -f "${FILE}" ]; then
+        echo -e "Command \"\e[32m${COMMAND}\e[0m\" not exist"
+        exit 1
+    fi
+
+    bash "${FILE}" "${@:2}"
 }
 
 function get_command_file() {

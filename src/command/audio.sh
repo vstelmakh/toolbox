@@ -182,11 +182,12 @@ function command_help() {
 
   Hint. Add custom keyboard shortcuts to quickly switch audio output.
   See: \e[33mSettings - \e[33mKeyboard - \e[33mCustomize Shortcuts - \e[33mCustom Shortcuts\e[0m
-  Keys suggestions:
-    Ctrl + Super + H       - for headphones
-    Ctrl + Super + T       - for headset
-    Ctrl + Super + B       - for builtin
-    Ctrl + Super + Alt + R - for reconnect
+
+  Definition suggestions:
+    \e[32mtoolbox audio\e[0m \e[36mheadphones\e[0m : Ctrl + Super + H
+    \e[32mtoolbox audio\e[0m \e[36mheadset\e[0m    : Ctrl + Super + T
+    \e[32mtoolbox audio\e[0m \e[36mbuiltin\e[0m    : Ctrl + Super + B
+    \e[32mtoolbox audio\e[0m \e[36mreconnect\e[0m  : Ctrl + Super + Alt + R
 HEREDOC
 )
     echo -e "${TEXT}"

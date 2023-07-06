@@ -19,7 +19,7 @@ function main() {
 }
 
 function command_description() {
-    echo "Decode or encode base64 input"
+    echo "Decode or encode url input"
 }
 
 function command_completion() {
@@ -33,11 +33,11 @@ function command_completion() {
 function command_execute() {
     case "${1}" in
         "decode")
-            echo -n "${*:2}" | base64 --decode --ignore-garbage
+            LANG=C urldecode "${*:2}"
             echo
             ;;
         "encode")
-            echo -n "${*:2}" | base64 --wrap=0
+            LANG=C urlencode "${*:2}"
             echo
             ;;
         "")
@@ -51,18 +51,38 @@ function command_execute() {
     esac
 }
 
+function urldecode() {
+    local STRING="${*//+/ }";
+    echo -en "${STRING//%/\\x}";
+}
+
+function urlencode() {
+    local STRING=${#1}
+    for (( i = 0; i < STRING; i++ )); do
+        local CHAR=${1:i:1}
+        case "${CHAR}" in
+            [a-zA-Z0-9.~_-])
+                echo -n "${CHAR}"
+                ;;
+            *)
+                printf '%%%.2X' "'${CHAR}"
+                ;;
+        esac
+    done
+}
+
 function command_help() {
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  base64 [options] <action> <data>
-  base64 encode string-to-encode
+  url [options] <action> <string>
+  url encode string-to-encode
 
 \e[33mArguments:\e[0m
   \e[32maction\e[0m      Action to perform. Available values: "decode", "encode".
-  \e[32mdata\e[0m        String data to decode or encode. Remember to \e[36menclose input in single quotes\e[0m to prevent shell processing special chars.
+  \e[32mdata\e[0m        String to decode or encode. Remember to \e[36menclose input in single quotes\e[0m to prevent shell processing special chars.
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help

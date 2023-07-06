@@ -25,10 +25,15 @@ function command_description() {
 function command_completion() {
     case "${#@}" in
         1)
+            [[ ${1} = "--"* ]] && echo "--help" && exit
+            [[ ${1} = "-"* ]] && echo "-h" && exit
+
             echo "install uninstall"
             ;;
         2)
-            echo "--force"
+            if [ "${1}" == "install" ] || [ "${1}" == "uninstall" ]; then
+                echo "--force"
+            fi
             ;;
     esac
 }

@@ -27,6 +27,9 @@ function command_description() {
 function command_completion() {
     case "${#@}" in
         1)
+            [[ ${1} = "--"* ]] && echo "--checkout --help" && exit
+            [[ ${1} = "-"* ]] && echo "-c -h" && exit
+
             echo "--checkout"
             ;;
     esac

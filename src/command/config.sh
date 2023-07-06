@@ -23,7 +23,14 @@ function command_description() {
 }
 
 function command_completion() {
-    echo ""
+    case "${#@}" in
+        1)
+            [[ ${1} = "--"* ]] && echo "--help" && exit
+            [[ ${1} = "-"* ]] && echo "-h" && exit
+
+            echo ""
+            ;;
+    esac
 }
 
 function command_execute() {

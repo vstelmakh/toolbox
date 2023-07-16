@@ -28,7 +28,7 @@ function command_completion() {
             [[ ${1} = "--"* ]] && echo "--help" && exit
             [[ ${1} = "-"* ]] && echo "-h" && exit
 
-            echo ""
+            echo "$(get_commands)"
             ;;
     esac
 }
@@ -47,7 +47,7 @@ function command_execute() {
 # It's important to execute this command without env variables
 # to not pollute validation environment with existing config variables
 function command_execute_without_env() {
-    local _CONFIG_FILE="$(get_config_file_path)"
+    local _CONFIG_FILE="$(get_project_root_dir)/config.env"
     declare -A PARAMETERS_MISSING=()
     declare -A PARAMETERS_UNEXPECTED=()
     declare -A PARAMETERS_DEFINED=()
@@ -128,10 +128,20 @@ function command_execute_without_env() {
     fi
 }
 
-function get_config_file_path() {
+function get_project_root_dir() {
     local SCRIPT=$(readlink -f "${0}")
     local DIR=$(dirname "${SCRIPT}")
-    echo "${DIR}/../../config.env" || exit 1
+    echo "${DIR}/../.." || exit 1
+}
+
+function get_commands() {
+    local COMMANDS=()
+    local SCRIPTS=$(ls "$(get_project_root_dir)/src/command"/*.sh)
+    for SCRIPT in ${SCRIPTS}; do
+        local COMMAND=$(echo "${SCRIPT}" | sed -E "s/^.+\///g" | sed -E "s/\.sh$//g")
+        COMMANDS+=("${COMMAND}")
+    done
+    echo "${COMMANDS[@]}"
 }
 
 function command_help() {

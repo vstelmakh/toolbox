@@ -142,6 +142,17 @@ function assert_starts_with() {
     fi
 }
 
+function assert_not_empty() {
+    local ACTUAL="${1}"
+    if [ -n "${ACTUAL}" ]; then
+        return 0
+    else
+        echo -e "\e[33mExpected: \e[0m\e[2m~not empty~\e[0m"
+        echo -e "\e[36mActual:   \e[0m${ACTUAL}"
+        return 1
+    fi
+}
+
 function get_assert_functions() {
     declare -F | cut -d ' ' -f3 | grep '^assert_'
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2155
+# shellcheck disable=SC2016,SC2155
 
 function exec_command() {
     bash "${_TOOLBOX_BIN}" "url" "${@}"

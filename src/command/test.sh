@@ -1,7 +1,39 @@
 #!/bin/bash
-# shellcheck disable=SC2155,SC1090
+# shellcheck disable=SC2155
 
 function main() {
+    case "${1}" in
+        "--toolbox-description")
+            command_description
+            ;;
+        "--toolbox-completion")
+            command_completion "${@:2}"
+            ;;
+        "-h"|"--help")
+            command_help "${@:2}"
+            ;;
+        *)
+            command_execute "$@"
+            ;;
+    esac
+}
+
+function command_description() {
+    echo "Run toolbox project tests"
+}
+
+function command_completion() {
+    case "${#@}" in
+        1)
+            [[ ${1} = "--"* ]] && echo "--help" && exit
+            [[ ${1} = "-"* ]] && echo "-h" && exit
+
+            echo ""
+            ;;
+    esac
+}
+
+function command_execute() {
     export _TOOLBOX_PROJECT_ROOT=$(get_project_root_dir)
     export _TOOLBOX_BIN="${_TOOLBOX_PROJECT_ROOT}/bin/toolbox"
 
@@ -19,7 +51,7 @@ function main() {
     local FAIL_FUNCTIONS=()
     local FAIL_OUTPUTS=()
 
-    local RUNTIME_START=$(date +%s)
+    local TIME_START=$(date +%s)
 
     local DIR_TESTS="${_TOOLBOX_PROJECT_ROOT}/tests"
     local TEST_SCRIPTS="$(get_test_scripts "${DIR_TESTS}")"
@@ -48,11 +80,11 @@ function main() {
             fi
         done
     done
-    local RUNTIME_END=$(date +%s)
+    local TIME_END=$(date +%s)
     echo
 
     echo
-    local RUNTIME=$((RUNTIME_END-RUNTIME_START))
+    local RUNTIME=$((TIME_END - TIME_START))
     echo "Time: $(get_readable_runtime "${RUNTIME}")"
     echo "Tests: ${COUNT_TOTAL}, Successful: ${COUNT_SUCCESS}, Failed: ${COUNT_FAIL}"
 
@@ -75,7 +107,7 @@ function main() {
 function get_project_root_dir() {
     local SCRIPT=$(readlink -f "${0}")
     local DIR=$(dirname "${SCRIPT}")
-    (readlink -f "${DIR}/..") || exit 1
+    (readlink -f "${DIR}/../..") || exit 1
 }
 
 function get_test_scripts() {
@@ -122,6 +154,22 @@ function get_readable_runtime() {
 
 function get_assert_functions() {
     declare -F | cut -d ' ' -f3 | grep '^assert_'
+}
+
+function command_help() {
+    local TEXT=$(cat << HEREDOC
+\e[33mDescription:\e[0m
+  $(command_description)
+
+\e[33mUsage:\e[0m
+  test [options]
+  test
+
+\e[33mOptions:\e[0m
+  \e[32m-h, --help\e[0m  Display this help
+HEREDOC
+)
+    echo -e "${TEXT}"
 }
 
 main "$@"

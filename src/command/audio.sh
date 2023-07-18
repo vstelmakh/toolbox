@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2155
+# shellcheck disable=SC2015,SC2155
 
 # Configuration
 # Use "bluetoothctl paired-devices" to check for bluetooth mac address. Device should be paired already.
@@ -79,19 +79,19 @@ function switch_to_headphones() {
     echo -e "Switching audio output to bluetooth \e[32mheadphones\e[0m"
     connect_bluetooth_device
     set_card_profile "a2dp_sink"
-    set_audio_output ${SINK_HEADPHONES_NAME}
+    set_audio_output "${SINK_HEADPHONES_NAME}"
 }
 
 function switch_to_headset() {
     echo -e "Switching audio output to bluetooth \e[32mheadset\e[0m"
     connect_bluetooth_device
     set_card_profile "handsfree_head_unit"
-    set_audio_output ${SINK_HEADSET_NAME}
+    set_audio_output "${SINK_HEADSET_NAME}"
 }
 
 function switch_to_builtin() {
     echo -e "Switching audio output to \e[32mbuiltin\e[0m"
-    set_audio_output ${SINK_BUILTIN_NAME}
+    set_audio_output "${SINK_BUILTIN_NAME}"
 }
 
 # Sometimes on headphones mode volume is too low, while reconnect solves an issue
@@ -104,9 +104,9 @@ function connect_bluetooth_device() {
     echo -en "Connecting bluetooth device \e[33m${BLUETOOTH_DEVICE_MAC}\e[0m"
 
     local OUTPUT;
-    if bluetoothctl info ${BLUETOOTH_DEVICE_MAC} | grep -q "Connected: no"; then
-        OUTPUT=$(bluetoothctl connect ${BLUETOOTH_DEVICE_MAC} 2>&1) && echo " [OK]" \
-            || { echo " [ERROR]"; echo ${OUTPUT}; exit 1; }
+    if bluetoothctl info "${BLUETOOTH_DEVICE_MAC}" | grep -q "Connected: no"; then
+        OUTPUT=$(bluetoothctl connect "${BLUETOOTH_DEVICE_MAC}" 2>&1) && echo " [OK]" \
+            || { echo " [ERROR]"; echo "${OUTPUT}"; exit 1; }
     else
         echo " [OK]"
     fi
@@ -116,9 +116,9 @@ function disconnect_bluetooth_device() {
     echo -en "Disconnecting bluetooth device \e[33m${BLUETOOTH_DEVICE_MAC}\e[0m"
 
     local OUTPUT;
-    if bluetoothctl info ${BLUETOOTH_DEVICE_MAC} | grep -q "Connected: yes"; then
-        OUTPUT=$(bluetoothctl disconnect ${BLUETOOTH_DEVICE_MAC} 2>&1) && echo " [OK]" \
-            || { echo " [ERROR]"; echo ${OUTPUT}; exit 1; }
+    if bluetoothctl info "${BLUETOOTH_DEVICE_MAC}" | grep -q "Connected: yes"; then
+        OUTPUT=$(bluetoothctl disconnect "${BLUETOOTH_DEVICE_MAC}" 2>&1) && echo " [OK]" \
+            || { echo " [ERROR]"; echo "${OUTPUT}"; exit 1; }
     else
         echo " [OK]"
     fi
@@ -130,7 +130,7 @@ function set_card_profile() {
 
     local ATTEMPTS=30
     local OUTPUT;
-    until [[ ${ATTEMPTS} -eq 0 ]] || OUTPUT=$(pactl set-card-profile ${CARD_HEADPHONES_NAME} ${CARD_PROFILE} 2>&1); do
+    until [[ ${ATTEMPTS} -eq 0 ]] || OUTPUT=$(pactl set-card-profile "${CARD_HEADPHONES_NAME}" "${CARD_PROFILE}" 2>&1); do
         sleep 1
         ATTEMPTS=$((ATTEMPTS - 1))
         echo -n "."
@@ -138,7 +138,7 @@ function set_card_profile() {
 
     if [[ ${ATTEMPTS} -eq 0 ]]; then
         echo " [ERROR]"
-        echo ${OUTPUT}
+        echo "${OUTPUT}"
         exit 1
     fi
 
@@ -150,7 +150,7 @@ function set_audio_output() {
     echo -en "Setting audio sink to \e[33m${SINK_NAME}\e[0m"
 
     local ATTEMPTS=30
-    until [[ ${ATTEMPTS} -eq 0 ]] || pactl list sinks short | grep -q ${SINK_NAME}; do
+    until [[ ${ATTEMPTS} -eq 0 ]] || pactl list sinks short | grep -q "${SINK_NAME}"; do
         sleep 1
         ATTEMPTS=$((ATTEMPTS - 1))
         echo -n "."
@@ -162,7 +162,7 @@ function set_audio_output() {
         exit 1
     fi
 
-    pactl set-default-sink ${SINK_NAME} && echo " [OK]"
+    pactl set-default-sink "${SINK_NAME}" && echo " [OK]"
 }
 
 function command_help() {

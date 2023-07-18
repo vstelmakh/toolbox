@@ -107,7 +107,7 @@ function command_execute() {
 function get_project_root_dir() {
     local SCRIPT=$(readlink -f "${0}")
     local DIR=$(dirname "${SCRIPT}")
-    (readlink -f "${DIR}/../..") || exit 1
+    readlink -f "${DIR}/../.." || exit 1
 }
 
 function get_test_scripts() {

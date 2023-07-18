@@ -131,7 +131,7 @@ function command_execute_without_env() {
 function get_project_root_dir() {
     local SCRIPT=$(readlink -f "${0}")
     local DIR=$(dirname "${SCRIPT}")
-    echo "${DIR}/../.." || exit 1
+    readlink -f "${DIR}/../.." || exit 1
 }
 
 function get_commands() {

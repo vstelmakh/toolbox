@@ -9,12 +9,12 @@ jobs:
             -   name: Git checkout
                 uses: actions/checkout@v3
 
-            -   name: Run tests
-                run: ./bin/toolbox test
-
                 # https://github.com/koalaman/shellcheck/wiki/Recursiveness
                 # https://www.mankier.com/1/shellcheck
             -   name: Run shellcheck
                 run: |
                     shellcheck --version && echo
                     find ./bin ./src ./tests -type f -print0 | xargs -0 grep -lE '^#!.*/(sh|bash)' | xargs shellcheck --color=always --severity=info
+
+            -   name: Run tests
+                run: ./bin/toolbox test

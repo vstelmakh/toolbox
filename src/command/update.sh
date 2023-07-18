@@ -45,7 +45,7 @@ function command_execute() {
         exit 1
     fi
 
-    git pull
+    git pull --quiet
 
     local CURRENT_COMMIT="$(git rev-parse --short HEAD)"
     echo -e "Version: \e[33mmaster\e[0m \e[36m${CURRENT_COMMIT}\e[0m"
@@ -53,7 +53,7 @@ function command_execute() {
     local FILE_CHANGES="$(git -c color.ui=always status --short --untracked-files=no)"
     if [ -n "${FILE_CHANGES}" ]; then
         echo
-        echo -e "\e[103m  \e[0m Project dir contains local file changes:"
+        echo -e "\e[103m !\e[0m Project dir contains local file changes:"
         echo -e "${FILE_CHANGES}"
     fi
 }

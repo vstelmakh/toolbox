@@ -36,10 +36,7 @@ function command_completion() {
 function command_execute() {
     export _TOOLBOX_PROJECT_ROOT=$(get_project_root_dir)
     export _TOOLBOX_BIN="${_TOOLBOX_PROJECT_ROOT}/bin/toolbox"
-
-    source "${_TOOLBOX_PROJECT_ROOT}/src/test/assert.sh"
-    # shellcheck disable=SC2046
-    export -f $(get_assert_functions)
+    source "${_TOOLBOX_PROJECT_ROOT}/src/test/asserts.sh"
 
     local PROGRESS_MAX_WIDTH=80
 
@@ -150,10 +147,6 @@ function get_readable_runtime() {
     fi
 
     echo "${RESULT}"
-}
-
-function get_assert_functions() {
-    declare -F | cut -d ' ' -f3 | grep '^assert_'
 }
 
 function command_help() {

@@ -46,3 +46,9 @@ function assert_match() {
         return 1
     fi
 }
+
+function get_assert_functions() {
+    declare -F | cut -d ' ' -f3 | grep '^assert_'
+}
+# shellcheck disable=SC2046
+export -f $(get_assert_functions)

@@ -46,7 +46,7 @@ function command_execute() {
     BIN_DIR="${HOME}/.local/bin"
     BIN_LINK="${BIN_DIR}/${BIN_NAME}"
 
-    COMPLETION="${DIR_PROJECT_ROOT}/src/completion/completion.bash"
+    COMPLETION="${DIR_PROJECT_ROOT}/src/completion/completion-bash.sh"
     COMPLETION_DIR="${HOME}/.local/share/bash-completion/completions"
     COMPLETION_LINK="${COMPLETION_DIR}/${BIN_NAME}"
 

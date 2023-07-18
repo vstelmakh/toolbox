@@ -64,9 +64,21 @@ function command_execute() {
 
 function generate_password() {
     local LENGTH="${1}"
-    local CHARSET=$([ "${2}" != true ] && echo "A-Za-z0-9" || echo "A-Za-z0-9!@#$%&*=+.?")
+    local IS_COMPLEX="${2}"
+    local CHARSET=$([ "${IS_COMPLEX}" != true ] && echo "A-Za-z0-9" || echo "A-Za-z0-9!@#$%&*=+.?")
     local AMBIGUOUS_CHARS="IOl"
-    head /dev/urandom | tr -dc "${CHARSET}" | tr -d "${AMBIGUOUS_CHARS}" | head -c"${LENGTH}"
+    local PASSWORD="$(head /dev/urandom | tr -dc "${CHARSET}" | tr -d "${AMBIGUOUS_CHARS}" | head -c"${LENGTH}")"
+
+    # make sure complex password always contains specialchar
+    if [ "${IS_COMPLEX}" == true ]; then
+        local SPECIALCHARS='!@#$%&*=+.?'
+        local CHAR="${SPECIALCHARS:$(( ${RANDOM} % ${#SPECIALCHARS} )):1}"
+        local POS=$((1 + ${RANDOM} % ${#PASSWORD}))
+        POS=$([ "${POS}" == "${LENGTH}" ] && echo $((POS - 1)) || echo ${POS})
+        PASSWORD="${PASSWORD:0:${POS}}${CHAR}${PASSWORD:$((POS + 1))}"
+    fi
+
+    echo "${PASSWORD}"
 }
 
 function command_help() {

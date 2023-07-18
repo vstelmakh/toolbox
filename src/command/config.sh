@@ -88,7 +88,7 @@ function command_execute_without_env() {
         if [ -z ${PARAMETERS_MISSING["${PARAMETER}"]+x} ]; then
             PARAMETERS_UNEXPECTED+=([${PARAMETER}]=${!PARAMETER})
         else
-            unset PARAMETERS_MISSING["${PARAMETER}"]
+            unset "PARAMETERS_MISSING[${PARAMETER}]"
             PARAMETERS_DEFINED+=([${PARAMETER}]=${!PARAMETER})
         fi
         unset "${PARAMETER}"
@@ -131,7 +131,7 @@ function command_execute_without_env() {
 function get_project_root_dir() {
     local SCRIPT=$(readlink -f "${0}")
     local DIR=$(dirname "${SCRIPT}")
-    echo "${DIR}/../.." || exit 1
+    readlink -f "${DIR}/../.." || exit 1
 }
 
 function get_commands() {

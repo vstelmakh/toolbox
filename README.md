@@ -1,4 +1,6 @@
 # Toolbox
+[![build](https://github.com/vstelmakh/toolbox/actions/workflows/build.yml/badge.svg)](https://github.com/vstelmakh/toolbox/actions)
+
 **Toolbox** - is a collection of tools to make my life (work) easier. It contains various bash scripts to simplify common tasks.
 
 ## Setup

@@ -1,3 +1,4 @@
+#!/bin/bash
 # shellcheck disable=SC2155,SC2207
 
 _toolbox_completions() {

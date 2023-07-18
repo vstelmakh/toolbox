@@ -88,7 +88,7 @@ function command_execute_without_env() {
         if [ -z ${PARAMETERS_MISSING["${PARAMETER}"]+x} ]; then
             PARAMETERS_UNEXPECTED+=([${PARAMETER}]=${!PARAMETER})
         else
-            unset PARAMETERS_MISSING["${PARAMETER}"]
+            unset "PARAMETERS_MISSING[${PARAMETER}]"
             PARAMETERS_DEFINED+=([${PARAMETER}]=${!PARAMETER})
         fi
         unset "${PARAMETER}"

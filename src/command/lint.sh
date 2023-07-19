@@ -39,11 +39,20 @@ function command_execute() {
     shellcheck --version
     echo
 
-    local SCRIPTS=$(get_project_scripts)
-    local SCRIPTS_COUNT="$(echo "${SCRIPTS}" | wc -l)"
+    if [ -n "${1}" ]; then
+        local FILES=$(get_files_from_arguments "${@}")
+    else
+        local FILES=$(get_project_scripts)
+    fi
 
-    echo "Checking ${SCRIPTS_COUNT} files..." && echo
-    run_shellcheck "${SCRIPTS}" && echo -e "\e[42m OK \e[0m"
+    local FILES_COUNT="$(echo "${FILES}" | wc -l)"
+    if [ "${FILES_COUNT}" == 1 ]; then
+        echo -e "Checking \e[36m${FILES}\e[0m..." && echo
+    else
+        echo -e "Checking \e[36m${FILES_COUNT}\e[0m files..." && echo
+    fi
+
+    run_shellcheck "${FILES[@]}" && echo -e "\e[42m OK \e[0m"
 }
 
 function get_project_root_dir() {
@@ -52,8 +61,24 @@ function get_project_root_dir() {
     readlink -f "${DIR}/../.." || exit 1
 }
 
-function get_project_scripts() {
+function get_files_from_arguments() {
+    local FILES=()
 
+    for FILE in "${@:1}"; do
+        if [[ "${FILE}" =~ (^\.{2,}|\/\.{2,}|\.{2,}\/) ]]; then
+            echo -e "Can't lint files outside project dir: \e[36m${FILE}\e[0m"
+            echo -e "\e[41m Error \e[0m"
+            exit 1
+        fi
+
+        local RELATIVE_FILE=$(echo "${FILE#"${DIR_PROJECT_ROOT}"}" | sed -E "s/^\///g")
+        FILES=("${FILES[@]}" "${DIR_PROJECT_ROOT}/${RELATIVE_FILE}")
+    done
+
+    IFS=$'\n'; echo "${FILES[*]}"
+}
+
+function get_project_scripts() {
     find \
         "${DIR_PROJECT_ROOT}/bin" \
         "${DIR_PROJECT_ROOT}/src" \
@@ -64,7 +89,7 @@ function get_project_scripts() {
 
 # https://github.com/koalaman/shellcheck/wiki/Recursiveness
 function run_shellcheck() {
-    echo "${1}" | xargs shellcheck --color=always --severity=info
+    echo "${@}" | xargs shellcheck --color=always --severity=info
 }
 
 function command_help() {
@@ -73,8 +98,11 @@ function command_help() {
   $(command_description)
 
 \e[33mUsage:\e[0m
-  lint [options] [<version>]
-  lint
+  lint [options] [<files>...]
+  lint src/command/anycommand.sh
+
+\e[33mArguments:\e[0m
+  \e[32mfiles\e[0m       Specific files to process. If ommited all the project shell scripts will be processed.
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help

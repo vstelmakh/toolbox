@@ -9,15 +9,8 @@ jobs:
             -   name: Git checkout
                 uses: actions/checkout@v3
 
-                # https://github.com/koalaman/shellcheck/wiki/Recursiveness
-                # https://www.mankier.com/1/shellcheck
             -   name: Run shellcheck
-                run: |
-                    shellcheck --version && echo
-                    SCRIPTS=$(find ./bin ./src ./tests -type f -print0 | xargs -0 grep -lE '^#!.*/(sh|bash)')
-                    SCRIPTS_COUNT="$(echo "${SCRIPTS}" | wc -l)"
-                    echo "Checking ${SCRIPTS_COUNT} files..." && echo
-                    echo "${SCRIPTS}" | xargs shellcheck --color=always --severity=info
+                run: ./bin/toolbox lint
 
             -   name: Run tests
                 run: ./bin/toolbox test

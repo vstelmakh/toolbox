@@ -45,10 +45,12 @@ function command_execute() {
         exit 1
     fi
 
+    local COMMIT_HASH_OLD="$(git rev-parse --short HEAD)"
     git pull --quiet
+    local COMMIT_HASH_NEW="$(git rev-parse --short HEAD)"
 
-    local CURRENT_COMMIT="$(git rev-parse --short HEAD)"
-    echo -e "Version: \e[33mmaster\e[0m \e[36m${CURRENT_COMMIT}\e[0m"
+    [ "${COMMIT_HASH_OLD}" != "${COMMIT_HASH_NEW}" ] && echo "Update successful" || echo "Already up to date"
+    echo -e "Version: \e[33mmaster\e[0m \e[36m${COMMIT_HASH_NEW}\e[0m"
 
     local FILE_CHANGES="$(git -c color.ui=always status --short --untracked-files=no)"
     if [ -n "${FILE_CHANGES}" ]; then

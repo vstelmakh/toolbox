@@ -2,6 +2,8 @@
 # shellcheck disable=SC2155
 
 function main() {
+    DIR_PROJECT_ROOT="$(get_project_root_dir)"
+
     case "${1}" in
         "--toolbox-description")
             command_description
@@ -27,15 +29,19 @@ function command_completion() {
         1)
             [[ ${1} = "--"* ]] && echo "--help --verbose" && exit
             [[ ${1} = "-"* ]] && echo "-h -v" && exit
-
-            echo ""
             ;;
     esac
+
+    local SCRIPTS=()
+    readarray -t SCRIPTS <<< "$(get_project_scripts)"
+    local COMLETION=""
+    for FILE in "${SCRIPTS[@]}"; do
+        COMLETION="${COMLETION} $(echo "${FILE#"${DIR_PROJECT_ROOT}"}" | sed -E "s/^\///g")"
+    done
+    echo "${COMLETION}"
 }
 
 function command_execute() {
-    DIR_PROJECT_ROOT="$(get_project_root_dir)"
-
     shellcheck --version
     echo
 
@@ -120,7 +126,7 @@ function command_help() {
 
 \e[33mUsage:\e[0m
   lint [options] [<files>...]
-  lint src/command/anycommand.sh src/command/othercommand.sh
+  lint src/script1.sh src/script2.sh
 
 \e[33mArguments:\e[0m
   \e[32mfiles\e[0m          Specific files to process. If ommited all the project shell scripts will be processed.

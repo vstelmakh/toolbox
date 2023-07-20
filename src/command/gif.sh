@@ -41,6 +41,7 @@ function command_execute() {
     local DURATION_SEC="3600"
     local FPS="24"
     local WIDTH_PX="0"
+    local MAX_COLORS="256"
     local LOOP="0"
     local FINAL_DELAY_MS="0"
 
@@ -65,6 +66,10 @@ function command_execute() {
                 ;;
             -w|--width)
                 WIDTH_PX="${2}"
+                shift
+                ;;
+            -c|--colors)
+                MAX_COLORS="${2}"
                 shift
                 ;;
             -l|--loop)
@@ -93,7 +98,7 @@ function command_execute() {
         -i "${INPUT}" \
         -ss "${SKIP_SEC}" \
         -t "${DURATION_SEC}" \
-        -vf "fps=${FPS},scale=${WIDTH_PX}:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
+        -vf "fps=${FPS},scale=${WIDTH_PX}:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=${MAX_COLORS}[p];[s1][p]paletteuse" \
         -loop "${LOOP}" \
         -final_delay "${FINAL_DELAY_MS}" \
         "${OUTPUT}" \
@@ -115,6 +120,7 @@ function command_help() {
   \e[32moutput\e[0m          Output gif file path
 
 \e[33mOptions:\e[0m
+  \e[32m-c, --colors\e[0m    Max colors in result gif. Allowed range: 4 - 256. \e[33m[default: 256]\e[0m
   \e[32m-d, --duration\e[0m  Max duration N seconds. \e[33m[default: 3600]\e[0m
   \e[32m-f, --fps\e[0m       Frames per second. \e[33m[default: 24]\e[0m
   \e[32m-h, --help\e[0m      Display this help

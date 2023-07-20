@@ -117,7 +117,7 @@ function command_help() {
 
 \e[33mArguments:\e[0m
   \e[32minput\e[0m           Input video file path
-  \e[32moutput\e[0m          Output gif file path
+  \e[32moutput\e[0m          Output gif file path \e[33m[default: %input_file%.gif]\e[0m
 
 \e[33mOptions:\e[0m
   \e[32m-c, --colors\e[0m    Max colors in result gif. Allowed range: 4 - 256. \e[33m[default: 256]\e[0m

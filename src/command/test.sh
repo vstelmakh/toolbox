@@ -34,7 +34,9 @@ function command_completion() {
 }
 
 function command_execute() {
+    TEST_FUNCTION_PREFIX='test_'
     local TEST_SCRIPT=${1}
+    local TEST_FUNCTION=${2}
 
     export _TOOLBOX_PROJECT_ROOT=$(get_project_root_dir)
     export _TOOLBOX_BIN="${_TOOLBOX_PROJECT_ROOT}/bin/toolbox"
@@ -64,7 +66,13 @@ function command_execute() {
     fi
 
     for TEST_SCRIPT in ${TEST_SCRIPTS}; do
-        local TEST_FUNCTIONS="$(get_test_functions "${TEST_SCRIPT}")"
+        if [ -n "${TEST_FUNCTION}" ]; then
+            validate_function_argument "${TEST_SCRIPT}" "${TEST_FUNCTION}"
+            local TEST_FUNCTIONS="${TEST_FUNCTION}"
+        else
+            local TEST_FUNCTIONS="$(get_test_functions "${TEST_SCRIPT}")"
+        fi
+
         for TEST_FUNCTION in ${TEST_FUNCTIONS}; do
             ((COUNT_TOTAL++))
 
@@ -143,8 +151,26 @@ function get_all_test_scripts() {
     find "${1}" -name '*_test.sh' -print
 }
 
+function validate_function_argument() {
+    local FILE="${1}"
+    local FUNCTION="${2}"
+
+    bash -c "source '${FILE}' && declare -F '${FUNCTION}'" > /dev/null
+    if [ $? -gt 0 ]; then
+        echo -e "Test function \e[36m${FUNCTION}\e[0m does not exist"
+        echo -e "\e[41m Error \e[0m"
+        exit 1
+    fi
+
+    if [[ ! "${FUNCTION}" =~ ^${TEST_FUNCTION_PREFIX} ]]; then
+        echo -e "Test function \e[36m${FUNCTION}\e[0m should be prefixed by \e[36m${TEST_FUNCTION_PREFIX}\e[0m"
+        echo -e "\e[41m Error \e[0m"
+        exit 1
+    fi
+}
+
 function get_test_functions() {
-    bash -c "source '${1}' && declare -F | cut -d ' ' -f3 | grep '^test_'"
+    bash -c "source '${1}' && declare -F | cut -d ' ' -f3 | grep '^${TEST_FUNCTION_PREFIX}'"
 }
 
 function run_test() {
@@ -187,11 +213,12 @@ function command_help() {
   $(command_description)
 
 \e[33mUsage:\e[0m
-  test [options] [<file>]
+  test [options] [<file>] [<function>]
   test command/url_test.sh
 
 \e[33mArguments:\e[0m
   \e[32mfile\e[0m       Specific test file to execute. If ommited all the project tests will be executed.
+  \e[32mfunction\e[0m   Specific test function to execute. If ommited all the file tests will be executed.
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help

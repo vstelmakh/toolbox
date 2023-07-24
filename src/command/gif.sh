@@ -28,7 +28,10 @@ function command_completion() {
             [[ ${1} = "--"* ]] && echo "--duration --fps --help --loglevel --loop --pause --skip --width" && exit
             [[ ${1} = "-"* ]] && echo "-d -f -h -l -p -s -w" && exit
 
-            echo ""
+            generate_file_completion "${1}"
+            ;;
+        2)
+            generate_file_completion "${2}"
             ;;
     esac
 }
@@ -90,7 +93,7 @@ function command_execute() {
     local INPUT="${ARGUMENTS[0]}"
     local OUTPUT="${ARGUMENTS[1]}"
     if [ -z "${OUTPUT}" ]; then
-        OUTPUT="$(echo "${INPUT}" | sed -E "s/\..+$//g").gif"
+        OUTPUT="$(echo "${INPUT}" | sed -E "s/\.[^.]+$//g").gif"
     fi
 
     ffmpeg -hide_banner \
@@ -104,6 +107,22 @@ function command_execute() {
         "${OUTPUT}" \
     && echo -e "Conversion complete" \
     && echo -e "Result saved as: \e[36m$(readlink -f "${OUTPUT}")\e[0m"
+}
+
+function generate_file_completion() {
+    local INPUT="${1}"
+    if [ -z "${INPUT}" ]; then
+        INPUT="./"
+    fi
+
+    local COMPLETION=()
+    readarray -t COMPLETION <<< "$(compgen -f ${INPUT})"
+
+    if [ ${#COMPLETION[@]} == 1 ] && [ -d "${COMPLETION[0]}" ]; then
+        compgen -f "${COMPLETION[0]}/"
+    else
+        echo "${COMPLETION[*]}"
+    fi
 }
 
 function command_help() {

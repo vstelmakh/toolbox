@@ -34,11 +34,11 @@ function command_completion() {
 
     local SCRIPTS=()
     readarray -t SCRIPTS <<< "$(get_project_scripts)"
-    local COMLETION=""
+    local COMPLETION=""
     for FILE in "${SCRIPTS[@]}"; do
-        COMLETION="${COMLETION} $(echo "${FILE#"${DIR_PROJECT_ROOT}"}" | sed -E "s/^\///g")"
+        COMPLETION="${COMPLETION} $(echo "${FILE#"${DIR_PROJECT_ROOT}"}" | sed -E "s/^\///g")"
     done
-    echo "${COMLETION}"
+    echo "${COMPLETION}"
 }
 
 function command_execute() {

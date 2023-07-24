@@ -34,6 +34,8 @@ function command_completion() {
 }
 
 function command_execute() {
+    local TEST_SCRIPT=${1}
+
     export _TOOLBOX_PROJECT_ROOT=$(get_project_root_dir)
     export _TOOLBOX_BIN="${_TOOLBOX_PROJECT_ROOT}/bin/toolbox"
     source "${_TOOLBOX_PROJECT_ROOT}/src/test/asserts.sh"
@@ -51,7 +53,16 @@ function command_execute() {
     local TIME_START=$(date +%s)
 
     local DIR_TESTS="${_TOOLBOX_PROJECT_ROOT}/tests"
-    local TEST_SCRIPTS="$(get_test_scripts "${DIR_TESTS}")"
+    if [ -n "${TEST_SCRIPT}" ]; then
+        TEST_SCRIPTS=$(get_one_test_script "${DIR_TESTS}" "${TEST_SCRIPT}")
+        if [ $? -gt 0 ]; then
+            echo -e "${TEST_SCRIPTS}"
+            exit 1
+        fi
+    else
+        TEST_SCRIPTS=$(get_all_test_scripts "${DIR_TESTS}")
+    fi
+
     for TEST_SCRIPT in ${TEST_SCRIPTS}; do
         local TEST_FUNCTIONS="$(get_test_functions "${TEST_SCRIPT}")"
         for TEST_FUNCTION in ${TEST_FUNCTIONS}; do
@@ -107,7 +118,28 @@ function get_project_root_dir() {
     readlink -f "${DIR}/../.." || exit 1
 }
 
-function get_test_scripts() {
+function get_one_test_script() {
+    local DIR_TESTS="${1}"
+    local FILE="${2}"
+    if [[ "${FILE}" =~ (^\.{2,}|\/\.{2,}|\.{2,}\/) ]]; then
+        echo -e "Can't test files outside tests dir: \e[36m${FILE}\e[0m"
+        echo -e "\e[41m Error \e[0m"
+        exit 1
+    fi
+
+    local RELATIVE_FILE=$(echo "${FILE#"${DIR_TESTS}"}" | sed -E "s/^\///g")
+    local TEST_SCRIPT="${DIR_TESTS}/${RELATIVE_FILE}"
+
+    if [ ! -f "${TEST_SCRIPT}" ]; then
+        echo -e "Test script \e[36m${FILE}\e[0m does not exist"
+        echo -e "\e[41m Error \e[0m"
+        exit 1
+    fi
+
+    echo "${TEST_SCRIPT}"
+}
+
+function get_all_test_scripts() {
     find "${1}" -name '*_test.sh' -print
 }
 
@@ -155,8 +187,11 @@ function command_help() {
   $(command_description)
 
 \e[33mUsage:\e[0m
-  test [options]
-  test
+  test [options] [<file>]
+  test command/url_test.sh
+
+\e[33mArguments:\e[0m
+  \e[32mfile\e[0m       Specific test file to execute. If ommited all the project tests will be executed.
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help

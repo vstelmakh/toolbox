@@ -55,13 +55,14 @@ function command_execute() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  base64 [options] <action> <data>
-  base64 encode string-to-encode
+  ${COMMAND} [options] <action> <data>
+  ${COMMAND} encode string-to-encode
 
 \e[33mArguments:\e[0m
   \e[32maction\e[0m      Action to perform. Available values: "decode", "encode".

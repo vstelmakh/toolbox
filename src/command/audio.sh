@@ -166,13 +166,14 @@ function set_audio_output() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  audio [options] <action>
-  audio headset
+  ${COMMAND} [options] <action>
+  ${COMMAND} headset
 
 \e[33mArguments:\e[0m
   \e[32maction\e[0m      Audio chanel to select / action to perform. Available values: "builtin", "headphones", "headset", "reconnect".

@@ -67,12 +67,13 @@ function get_project_root_dir() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  update [options]
+  ${COMMAND} [options]
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help

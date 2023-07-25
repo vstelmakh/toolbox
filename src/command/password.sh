@@ -82,13 +82,14 @@ function generate_password() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  password [options] [<length>]
-  password -c 10
+  ${COMMAND} [options] [<length>]
+  ${COMMAND} -c 10
 
 \e[33mArguments:\e[0m
   \e[32mlength\e[0m        Generated password length \e[33m[default: ${DEFAULT_LENGTH}]\e[0m

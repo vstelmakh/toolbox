@@ -38,13 +38,14 @@ function command_execute() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  aws [options] [<commands>...]
-  aws ec2 describe-instances
+  ${COMMAND} [options] [<commands>...]
+  ${COMMAND} ec2 describe-instances
 
 \e[33mArguments:\e[0m
   \e[32mcommands\e[0m    AWS CLI commands

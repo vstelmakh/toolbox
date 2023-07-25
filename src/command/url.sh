@@ -75,13 +75,14 @@ function urlencode() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  url [options] <action> <string>
-  url encode string-to-encode
+  ${COMMAND} [options] <action> <string>
+  ${COMMAND} encode string-to-encode
 
 \e[33mArguments:\e[0m
   \e[32maction\e[0m      Action to perform. Available values: "decode", "encode".

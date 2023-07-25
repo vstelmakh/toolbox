@@ -120,13 +120,14 @@ function run_shellcheck() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  lint [options] [<files>...]
-  lint src/script1.sh src/script2.sh
+  ${COMMAND} [options] [<files>...]
+  ${COMMAND} src/script1.sh src/script2.sh
 
 \e[33mArguments:\e[0m
   \e[32mfiles\e[0m          Specific files to process. If ommited all the project shell scripts will be processed.

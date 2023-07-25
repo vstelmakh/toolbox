@@ -126,13 +126,14 @@ function generate_file_completion() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  gif [options] <input> [<output>]
-  gif /path/to/video.mp4
+  ${COMMAND} [options] <input> [<output>]
+  ${COMMAND} /path/to/video.mp4
 
 \e[33mArguments:\e[0m
   \e[32minput\e[0m           Input video file path

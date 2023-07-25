@@ -225,13 +225,14 @@ function get_readable_runtime() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  test [options] [<file>] [<function>]
-  test command/url_test.sh
+  ${COMMAND} [options] [<file>] [<function>]
+  ${COMMAND} command/url_test.sh
 
 \e[33mArguments:\e[0m
   \e[32mfile\e[0m       Specific test file to execute. If ommited all the project tests will be executed.

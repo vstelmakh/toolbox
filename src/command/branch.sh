@@ -127,13 +127,14 @@ function get_trim_spacer() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  branch [options] <title>
-  branch WS-13 Define new project structure
+  ${COMMAND} [options] <title>
+  ${COMMAND} WS-13 Define new project structure
 
 \e[33mArguments:\e[0m
   \e[32mtitle\e[0m          Ticket title. Expected to look like: "WS-13 Define new project structure"

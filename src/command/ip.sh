@@ -49,13 +49,14 @@ function command_execute() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  ip [options] [<version>]
-  ip 64
+  ${COMMAND} [options] [<version>]
+  ${COMMAND} 64
 
 \e[33mArguments:\e[0m
   \e[32mversion\e[0m     IP version to detect. Available values: "4", "64". \e[33m[default: 4]\e[0m

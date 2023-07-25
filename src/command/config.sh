@@ -145,13 +145,14 @@ function get_commands() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  config [options] [<prefix>]
-  config audio
+  ${COMMAND} [options] [<prefix>]
+  ${COMMAND} audio
 
 \e[33mArguments:\e[0m
   \e[32mprefix\e[0m      Prefix (command) to check for specifically prefixed parameters (limit the scope to one command).

@@ -179,13 +179,14 @@ function print_info() {
 }
 
 function command_help() {
+    local COMMAND="$(basename -- "${0}" | sed -E 's/\.sh$//g')"
     local TEXT=$(cat << HEREDOC
 \e[33mDescription:\e[0m
   $(command_description)
 
 \e[33mUsage:\e[0m
-  ip [options] [<action>]
-  setup install -f
+  ${COMMAND} [options] [<action>]
+  ${COMMAND} install -f
 
 \e[33mArguments:\e[0m
   \e[32maction\e[0m      Action to perform. Available values: "install", "uninstall". \e[33m[default: install]\e[0m

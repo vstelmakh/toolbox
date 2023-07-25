@@ -2,6 +2,11 @@
 # shellcheck disable=SC2155
 
 function main() {
+    export _TOOLBOX_PROJECT_ROOT=$(get_project_root_dir)
+    export _TOOLBOX_BIN="${_TOOLBOX_PROJECT_ROOT}/bin/toolbox"
+    DIR_TESTS="${_TOOLBOX_PROJECT_ROOT}/tests"
+    TEST_FUNCTION_PREFIX='test_'
+
     case "${1}" in
         "--toolbox-description")
             command_description
@@ -28,22 +33,31 @@ function command_completion() {
             [[ ${1} = "--"* ]] && echo "--help" && exit
             [[ ${1} = "-"* ]] && echo "-h" && exit
 
-            echo ""
+            local SCRIPTS=()
+            readarray -t SCRIPTS <<< "$(get_all_test_scripts)"
+            local COMPLETION=""
+            for FILE in "${SCRIPTS[@]}"; do
+                COMPLETION="${COMPLETION} $(echo "${FILE#"${DIR_TESTS}"}" | sed -E "s/^\///g")"
+            done
+            echo "${COMPLETION}"
+            ;;
+        2)
+            local TEST_SCRIPT=$(get_one_test_script "${1}")
+            if ! validate_test_script_path "${TEST_SCRIPT}" >> /dev/null; then
+                exit
+            fi
+            get_test_functions "${TEST_SCRIPT}"
             ;;
     esac
 }
 
 function command_execute() {
-    TEST_FUNCTION_PREFIX='test_'
+    source "${_TOOLBOX_PROJECT_ROOT}/src/test/asserts.sh"
+
     local ARG_FILE=${1}
     local ARG_FUNCTION=${2}
 
-    export _TOOLBOX_PROJECT_ROOT=$(get_project_root_dir)
-    export _TOOLBOX_BIN="${_TOOLBOX_PROJECT_ROOT}/bin/toolbox"
-    source "${_TOOLBOX_PROJECT_ROOT}/src/test/asserts.sh"
-
     local PROGRESS_MAX_WIDTH=80
-
     local COUNT_TOTAL=0
     local COUNT_SUCCESS=0
     local COUNT_FAIL=0
@@ -54,12 +68,11 @@ function command_execute() {
 
     local TIME_START=$(date +%s)
 
-    local DIR_TESTS="${_TOOLBOX_PROJECT_ROOT}/tests"
     if [ -n "${ARG_FILE}" ]; then
-        local TEST_SCRIPTS=$(get_one_test_script "${DIR_TESTS}" "${ARG_FILE}")
-        validate_test_script_path "${DIR_TESTS}" "${TEST_SCRIPTS}"
+        local TEST_SCRIPTS=$(get_one_test_script "${ARG_FILE}")
+        validate_test_script_path "${TEST_SCRIPTS}"
     else
-        local TEST_SCRIPTS=$(get_all_test_scripts "${DIR_TESTS}")
+        local TEST_SCRIPTS=$(get_all_test_scripts)
     fi
 
     for TEST_SCRIPT in ${TEST_SCRIPTS}; do
@@ -124,8 +137,7 @@ function get_project_root_dir() {
 }
 
 function get_one_test_script() {
-    local DIR_TESTS="${1}"
-    local FILE="${2}"
+    local FILE="${1}"
 
     local RELATIVE_FILE=$(echo "${FILE#"${DIR_TESTS}"}" | sed -E "s/^\///g")
     local TEST_SCRIPT="${DIR_TESTS}/${RELATIVE_FILE}"
@@ -134,8 +146,7 @@ function get_one_test_script() {
 }
 
 function validate_test_script_path() {
-    local DIR_TESTS="${1}"
-    local FILE="${2}"
+    local FILE="${1}"
 
     if [[ "${FILE}" =~ (^\.{2,}|\/\.{2,}|\.{2,}\/) ]]; then
         echo -e "Can't test files outside tests dir: \e[36m${FILE}\e[0m"
@@ -153,7 +164,7 @@ function validate_test_script_path() {
 }
 
 function get_all_test_scripts() {
-    find "${1}" -name '*_test.sh' -print
+    find "${DIR_TESTS}" -name '*_test.sh' -print
 }
 
 function validate_test_function() {

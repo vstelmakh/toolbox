@@ -35,8 +35,8 @@ function command_completion() {
 
 function command_execute() {
     TEST_FUNCTION_PREFIX='test_'
-    local TEST_SCRIPT=${1}
-    local TEST_FUNCTION=${2}
+    local ARG_FILE=${1}
+    local ARG_FUNCTION=${2}
 
     export _TOOLBOX_PROJECT_ROOT=$(get_project_root_dir)
     export _TOOLBOX_BIN="${_TOOLBOX_PROJECT_ROOT}/bin/toolbox"
@@ -55,20 +55,17 @@ function command_execute() {
     local TIME_START=$(date +%s)
 
     local DIR_TESTS="${_TOOLBOX_PROJECT_ROOT}/tests"
-    if [ -n "${TEST_SCRIPT}" ]; then
-        TEST_SCRIPTS=$(get_one_test_script "${DIR_TESTS}" "${TEST_SCRIPT}")
-        if [ $? -gt 0 ]; then
-            echo -e "${TEST_SCRIPTS}"
-            exit 1
-        fi
+    if [ -n "${ARG_FILE}" ]; then
+        local TEST_SCRIPTS=$(get_one_test_script "${DIR_TESTS}" "${ARG_FILE}")
+        validate_test_script_path "${TEST_SCRIPTS}"
     else
-        TEST_SCRIPTS=$(get_all_test_scripts "${DIR_TESTS}")
+        local TEST_SCRIPTS=$(get_all_test_scripts "${DIR_TESTS}")
     fi
 
     for TEST_SCRIPT in ${TEST_SCRIPTS}; do
-        if [ -n "${TEST_FUNCTION}" ]; then
-            validate_function_argument "${TEST_SCRIPT}" "${TEST_FUNCTION}"
-            local TEST_FUNCTIONS="${TEST_FUNCTION}"
+        if [ -n "${ARG_FUNCTION}" ]; then
+            validate_test_function "${TEST_SCRIPT}" "${ARG_FUNCTION}"
+            local TEST_FUNCTIONS="${ARG_FUNCTION}"
         else
             local TEST_FUNCTIONS="$(get_test_functions "${TEST_SCRIPT}")"
         fi
@@ -129,29 +126,34 @@ function get_project_root_dir() {
 function get_one_test_script() {
     local DIR_TESTS="${1}"
     local FILE="${2}"
+
+    local RELATIVE_FILE=$(echo "${FILE#"${DIR_TESTS}"}" | sed -E "s/^\///g")
+    local TEST_SCRIPT="${DIR_TESTS}/${RELATIVE_FILE}"
+
+    echo "${TEST_SCRIPT}"
+}
+
+function validate_test_script_path() {
+    local FILE="${1}"
+
     if [[ "${FILE}" =~ (^\.{2,}|\/\.{2,}|\.{2,}\/) ]]; then
         echo -e "Can't test files outside tests dir: \e[36m${FILE}\e[0m"
         echo -e "\e[41m Error \e[0m"
         exit 1
     fi
 
-    local RELATIVE_FILE=$(echo "${FILE#"${DIR_TESTS}"}" | sed -E "s/^\///g")
-    local TEST_SCRIPT="${DIR_TESTS}/${RELATIVE_FILE}"
-
-    if [ ! -f "${TEST_SCRIPT}" ]; then
+    if [ ! -f "${FILE}" ]; then
         echo -e "Test script \e[36m${FILE}\e[0m does not exist"
         echo -e "\e[41m Error \e[0m"
         exit 1
     fi
-
-    echo "${TEST_SCRIPT}"
 }
 
 function get_all_test_scripts() {
     find "${1}" -name '*_test.sh' -print
 }
 
-function validate_function_argument() {
+function validate_test_function() {
     local FILE="${1}"
     local FUNCTION="${2}"
 

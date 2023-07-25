@@ -5,13 +5,13 @@
 
 ## Setup
 1. Clone the repository into desired location
-2. Execute `./bin/toolbox setup`
+2. Execute `./bin/toolbox self-setup`
 3. Create `config.env` from `config.env.dist` and adjust the parameters
 4. Re-login current user
 5. Use the tools available under `toolbox` command
 
 > Generally toolbox is ready to be used directly after clone, by executing `./bin/toolbox`.
-> But without `setup` autocomplete won't work.
+> But without `self-setup` autocomplete won't work.
 > And commands that require `config.env` won't work as well.
 
 ## Requirements

@@ -22,9 +22,9 @@ function main() {
 function command_execute() {
     if [ "${2}" != "--toolbox-completion" ]; then # config validation (except completion)
         local COMMAND=${1}
-        run_command config "${COMMAND}" >> /dev/null
+        run_command self-config "${COMMAND}" >> /dev/null
         if [ $? -gt 0 ]; then
-            echo -e "Missing required configuration. Execute \e[32mconfig\e[0m command for details."
+            echo -e "Missing required configuration. Execute \e[32mself-config\e[0m command for details."
             exit 1
         fi
     fi
@@ -45,12 +45,12 @@ function command_about() {
 \__/\____/\____/_/_.___/\____/_/|_|
 HEREDOC
 
-    run_command config >> /dev/null
+    run_command self-config >> /dev/null
     if [ $? -gt 0 ]; then
         echo
         echo -e "\e[93mWarning:\e[0m"
         echo -e "  Config \e[33mconfig.env\e[0m does not contain all the required parameters, some commands may not work."
-        echo -e "  Execute \e[32mconfig\e[0m command for the details."
+        echo -e "  Execute \e[32mself-config\e[0m command for the details."
     fi
 
     echo
@@ -100,11 +100,19 @@ function get_command_file() {
 
 function get_commands() {
     local COMMANDS=()
+    local SELF_COMMANDS=()
+
     local SCRIPTS=$(ls "${DIR_COMMAND}"/*.sh)
     for SCRIPT in ${SCRIPTS}; do
         local COMMAND=$(echo "${SCRIPT}" | sed -E "s/^.+\///g" | sed -E "s/\.sh$//g")
-        COMMANDS+=("${COMMAND}")
+        if [[ "${COMMAND}" =~ ^self\- ]]; then
+            SELF_COMMANDS+=("${COMMAND}")
+        else
+            COMMANDS+=("${COMMAND}")
+        fi
     done
+
+    COMMANDS=("${COMMANDS[@]}" "${SELF_COMMANDS[@]}")
     echo "${COMMANDS[@]}"
 }
 

@@ -8,7 +8,7 @@ _toolbox_completions() {
             ;;
         2)
             local COMPLETION=$(toolbox --toolbox-completion)
-            COMPREPLY=($(compgen -W "${COMPLETION}" "${COMP_WORDS[1]}"))
+            COMPREPLY=($(compgen -W "${COMPLETION}" \""${COMP_WORDS[1]}"\"))
             return 0
             ;;
         *)

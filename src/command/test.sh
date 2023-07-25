@@ -2,6 +2,11 @@
 # shellcheck disable=SC2155
 
 function main() {
+    export _TOOLBOX_PROJECT_ROOT=$(get_project_root_dir)
+    export _TOOLBOX_BIN="${_TOOLBOX_PROJECT_ROOT}/bin/toolbox"
+    DIR_TESTS="${_TOOLBOX_PROJECT_ROOT}/tests"
+    TEST_FUNCTION_PREFIX='test_'
+
     case "${1}" in
         "--toolbox-description")
             command_description
@@ -28,18 +33,31 @@ function command_completion() {
             [[ ${1} = "--"* ]] && echo "--help" && exit
             [[ ${1} = "-"* ]] && echo "-h" && exit
 
-            echo ""
+            local SCRIPTS=()
+            readarray -t SCRIPTS <<< "$(get_all_test_scripts)"
+            local COMPLETION=""
+            for FILE in "${SCRIPTS[@]}"; do
+                COMPLETION="${COMPLETION} $(echo "${FILE#"${DIR_TESTS}"}" | sed -E "s/^\///g")"
+            done
+            echo "${COMPLETION}"
+            ;;
+        2)
+            local TEST_SCRIPT=$(get_one_test_script "${1}")
+            if ! validate_test_script_path "${TEST_SCRIPT}" >> /dev/null; then
+                exit
+            fi
+            get_test_functions "${TEST_SCRIPT}"
             ;;
     esac
 }
 
 function command_execute() {
-    export _TOOLBOX_PROJECT_ROOT=$(get_project_root_dir)
-    export _TOOLBOX_BIN="${_TOOLBOX_PROJECT_ROOT}/bin/toolbox"
     source "${_TOOLBOX_PROJECT_ROOT}/src/test/asserts.sh"
 
-    local PROGRESS_MAX_WIDTH=80
+    local ARG_FILE=${1}
+    local ARG_FUNCTION=${2}
 
+    local PROGRESS_MAX_WIDTH=80
     local COUNT_TOTAL=0
     local COUNT_SUCCESS=0
     local COUNT_FAIL=0
@@ -50,10 +68,21 @@ function command_execute() {
 
     local TIME_START=$(date +%s)
 
-    local DIR_TESTS="${_TOOLBOX_PROJECT_ROOT}/tests"
-    local TEST_SCRIPTS="$(get_test_scripts "${DIR_TESTS}")"
+    if [ -n "${ARG_FILE}" ]; then
+        local TEST_SCRIPTS=$(get_one_test_script "${ARG_FILE}")
+        validate_test_script_path "${TEST_SCRIPTS}"
+    else
+        local TEST_SCRIPTS=$(get_all_test_scripts)
+    fi
+
     for TEST_SCRIPT in ${TEST_SCRIPTS}; do
-        local TEST_FUNCTIONS="$(get_test_functions "${TEST_SCRIPT}")"
+        if [ -n "${ARG_FUNCTION}" ]; then
+            validate_test_function "${TEST_SCRIPT}" "${ARG_FUNCTION}"
+            local TEST_FUNCTIONS="${ARG_FUNCTION}"
+        else
+            local TEST_FUNCTIONS="$(get_test_functions "${TEST_SCRIPT}")"
+        fi
+
         for TEST_FUNCTION in ${TEST_FUNCTIONS}; do
             ((COUNT_TOTAL++))
 
@@ -107,12 +136,58 @@ function get_project_root_dir() {
     readlink -f "${DIR}/../.." || exit 1
 }
 
-function get_test_scripts() {
-    find "${1}" -name '*_test.sh' -print
+function get_one_test_script() {
+    local FILE="${1}"
+
+    local RELATIVE_FILE=$(echo "${FILE#"${DIR_TESTS}"}" | sed -E "s/^\///g")
+    local TEST_SCRIPT="${DIR_TESTS}/${RELATIVE_FILE}"
+
+    echo "${TEST_SCRIPT}"
+}
+
+function validate_test_script_path() {
+    local FILE="${1}"
+
+    if [[ "${FILE}" =~ (^\.{2,}|\/\.{2,}|\.{2,}\/) ]]; then
+        echo -e "Can't test files outside tests dir: \e[36m${FILE}\e[0m"
+        echo -e "\e[41m Error \e[0m"
+        exit 1
+    fi
+
+    if [ ! -f "${FILE}" ]; then
+        local RELATIVE_FILE=$(echo "${FILE#"${DIR_TESTS}"}" | sed -E "s/^\///g")
+        echo -e "Test script does not exist:"
+        echo -e "\e[90m${DIR_TESTS}/\e[0m\e[36m${RELATIVE_FILE}\e[0m"
+        echo -e "\e[41m Error \e[0m"
+        exit 1
+    fi
+}
+
+function get_all_test_scripts() {
+    find "${DIR_TESTS}" -name '*_test.sh' -print
+}
+
+function validate_test_function() {
+    local FILE="${1}"
+    local FUNCTION="${2}"
+
+    bash -c "source '${FILE}' && declare -F '${FUNCTION}'" > /dev/null
+    if [ $? -gt 0 ]; then
+        echo -e "Test function does not exist:"
+        echo -e "\e[90m${FILE}\e[0m :: \e[36m${FUNCTION}\e[0m"
+        echo -e "\e[41m Error \e[0m"
+        exit 1
+    fi
+
+    if [[ ! "${FUNCTION}" =~ ^${TEST_FUNCTION_PREFIX} ]]; then
+        echo -e "Test function \e[36m${FUNCTION}\e[0m should be prefixed by \e[36m${TEST_FUNCTION_PREFIX}\e[0m"
+        echo -e "\e[41m Error \e[0m"
+        exit 1
+    fi
 }
 
 function get_test_functions() {
-    bash -c "source '${1}' && declare -F | cut -d ' ' -f3 | grep '^test_'"
+    bash -c "source '${1}' && declare -F | cut -d ' ' -f3 | grep '^${TEST_FUNCTION_PREFIX}'"
 }
 
 function run_test() {
@@ -155,8 +230,12 @@ function command_help() {
   $(command_description)
 
 \e[33mUsage:\e[0m
-  test [options]
-  test
+  test [options] [<file>] [<function>]
+  test command/url_test.sh
+
+\e[33mArguments:\e[0m
+  \e[32mfile\e[0m       Specific test file to execute. If ommited all the project tests will be executed.
+  \e[32mfunction\e[0m   Specific test function to execute. If ommited all the file tests will be executed.
 
 \e[33mOptions:\e[0m
   \e[32m-h, --help\e[0m  Display this help

@@ -57,7 +57,7 @@ function command_execute() {
     local DIR_TESTS="${_TOOLBOX_PROJECT_ROOT}/tests"
     if [ -n "${ARG_FILE}" ]; then
         local TEST_SCRIPTS=$(get_one_test_script "${DIR_TESTS}" "${ARG_FILE}")
-        validate_test_script_path "${TEST_SCRIPTS}"
+        validate_test_script_path "${DIR_TESTS}" "${TEST_SCRIPTS}"
     else
         local TEST_SCRIPTS=$(get_all_test_scripts "${DIR_TESTS}")
     fi
@@ -134,7 +134,8 @@ function get_one_test_script() {
 }
 
 function validate_test_script_path() {
-    local FILE="${1}"
+    local DIR_TESTS="${1}"
+    local FILE="${2}"
 
     if [[ "${FILE}" =~ (^\.{2,}|\/\.{2,}|\.{2,}\/) ]]; then
         echo -e "Can't test files outside tests dir: \e[36m${FILE}\e[0m"
@@ -143,7 +144,9 @@ function validate_test_script_path() {
     fi
 
     if [ ! -f "${FILE}" ]; then
-        echo -e "Test script \e[36m${FILE}\e[0m does not exist"
+        local RELATIVE_FILE=$(echo "${FILE#"${DIR_TESTS}"}" | sed -E "s/^\///g")
+        echo -e "Test script does not exist:"
+        echo -e "\e[90m${DIR_TESTS}/\e[0m\e[36m${RELATIVE_FILE}\e[0m"
         echo -e "\e[41m Error \e[0m"
         exit 1
     fi
@@ -159,7 +162,8 @@ function validate_test_function() {
 
     bash -c "source '${FILE}' && declare -F '${FUNCTION}'" > /dev/null
     if [ $? -gt 0 ]; then
-        echo -e "Test function \e[36m${FUNCTION}\e[0m does not exist"
+        echo -e "Test function does not exist:"
+        echo -e "\e[90m${FILE}\e[0m :: \e[36m${FUNCTION}\e[0m"
         echo -e "\e[41m Error \e[0m"
         exit 1
     fi

@@ -16,8 +16,13 @@
 
 ## Requirements
 Toolbox is developed and tested on Ubuntu with an idea to work out of the box.
-But some commands may require some extra dependencies like git or docker.
+But some commands may require some extra dependencies like git or docker etc.
 Compatibility with other systems is unknown.
+
+## Contribution
+If you see something to improve, fix or add - you are welcome to submit a PR.
+But keep in mind that this project is mostly for my personal use, so I may not accept your changes if they don't fit my preferences.
+Also, you can always fork the project and make your own toolbox.
 
 ## Credits
 [Volodymyr Stelmakh](https://github.com/vstelmakh)  

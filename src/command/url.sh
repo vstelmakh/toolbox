@@ -93,7 +93,7 @@ function command_help() {
 
 \e[33mHelp:\e[0m
   Process file contents by the command: \e[33murl encode "\$(cat path/to/file)"\e[0m
-  Redirect output to the file: \e[33murl decode > path/to/file\e[0m
+  Redirect output to the file: \e[33murl decode 'example%21' > path/to/file\e[0m
 HEREDOC
 )
     echo -e "${TEXT}"
